@@ -60,8 +60,8 @@ export class DxfViewer {
 
     // Use external camera or create a default one
     const camera = (this.camera = externalCamera || new three.OrthographicCamera(-1, 1, 1, -1, 0.1, 2));
-    camera.position.z = 1;
     if (!externalCamera) {
+        // camera.position.z = 1;
       camera.position.x = 0;
       camera.position.y = 0;
     }
@@ -76,11 +76,9 @@ export class DxfViewer {
 
     renderer.setClearColor(options.clearColor, options.clearAlpha);
 
-    // Initialize other properties
-    this.canvasWidth = options.canvasWidth || 400;
-    this.canvasHeight = options.canvasHeight || 300;
 
-    // Attach event listeners for pointer events
+
+    // // Attach event listeners for pointer events
     this.canvas.addEventListener("pointerdown", this._OnPointerEvent.bind(this));
     this.canvas.addEventListener("pointerup", this._OnPointerEvent.bind(this));
 
@@ -214,6 +212,7 @@ export class DxfViewer {
   }
 
   SetSize(width, height) {
+    console.log("renderer set size", width, height);
     this._EnsureRenderer();
 
     const hScale = width / this.canvasWidth;
@@ -261,10 +260,10 @@ export class DxfViewer {
     }
 
     this._EnsureRenderer();
-
-    if (!this.externalScene) {
-      this.Clear();
-    }
+    
+    // if (!this.externalScene) {
+    //     this.Clear();
+    // }
 
     this.worker = new DxfWorker(workerFactory ? workerFactory() : null);
     const { scene, dxf } = await this.worker.Load(url, fonts, this.options, progressCbk);
@@ -312,27 +311,28 @@ export class DxfViewer {
 
     this._Emit("loaded");
 
-    if (scene.bounds) {
-      this.FitView(
-        scene.bounds.minX - scene.origin.x,
-        scene.bounds.maxX - scene.origin.x,
-        scene.bounds.minY - scene.origin.y,
-        scene.bounds.maxY - scene.origin.y
-      );
-    } else {
-      this._Message("Empty document", MessageLevel.WARN);
-    }
+    // if (scene.bounds) {
+    //   this.FitView(
+    //     scene.bounds.minX - scene.origin.x,
+    //     scene.bounds.maxX - scene.origin.x,
+    //     scene.bounds.minY - scene.origin.y,
+    //     scene.bounds.maxY - scene.origin.y
+    //   );
+    // } else {
+    //   this._Message("Empty document", MessageLevel.WARN);
+    // }
 
     if (this.hasMissingChars) {
       this._Message("Some characters cannot be properly displayed due to missing fonts", MessageLevel.WARN);
     }
 
-    this._CreateControls();
+    //this._CreateControls();
     this.Render();
   }
 
   Render() {
     this._EnsureRenderer();
+    console.log("[DXF viewer] render");
     this.renderer.render(this.scene, this.camera);
   }
 
