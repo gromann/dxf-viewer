@@ -1,5 +1,9 @@
 # DXF viewer [![npm](https://img.shields.io/npm/v/dxf-viewer)](https://www.npmjs.com/package/dxf-viewer)
 
+# What have i changed in this fork?
+The goal is to use an existing three.js setup to make it integratable within an drawing application.
+
+
 *If you just need to view your DXF, [click here](https://vagran.github.io/dxf-viewer-example/).*
 
 This package provides DXF 2D viewer component written in JavaScript. It renders drawings using WebGL
