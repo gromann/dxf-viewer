@@ -79,8 +79,6 @@ export class DxfViewer {
 
 
     // // Attach event listeners for pointer events
-    this.canvas.addEventListener("pointerdown", this._OnPointerEvent.bind(this));
-    this.canvas.addEventListener("pointerup", this._OnPointerEvent.bind(this));
 
     // Render the initial scene
     this.Render();
@@ -336,7 +334,7 @@ export class DxfViewer {
     this.renderer.render(this.scene, this.camera);
   }
 
-  /** @return {Iterable<{name:String, color:number}>} List of layer names. */
+//   /** @return {Iterable<{name:String, color:number}>} List of layer names. */
   GetLayers() {
     const result = [];
     for (const lyr of this.layers.values()) {
@@ -344,6 +342,7 @@ export class DxfViewer {
         name: lyr.name,
         displayName: lyr.displayName,
         color: this._TransformColor(lyr.color),
+        raw: lyr
       });
     }
     return result;

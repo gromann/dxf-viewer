@@ -56,7 +56,7 @@ export declare class DxfViewer {
     FitView(minX: number, maxX: number, minY: number, maxY: number, padding: number): void
     GetCamera(): THREE.OrthographicCamera
     GetCanvas(): HTMLCanvasElement
-    GetLayers(): Iterable<LayerInfo>
+    GetLayers(): Array<LayerInfo>
     GetOrigin(): THREE.Vector2
     GetBounds(): {maxX: number, maxY: number, minX: number, minY: number} | null
     GetRenderer(): THREE.WebGLRenderer | null

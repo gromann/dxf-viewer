@@ -12,8 +12,13 @@ const ENDPOINT_MARGIN = 1e-4
 
 /** @return {boolean} True if both edges crossed from the same side, false otherwise. */
 function EdgeSameSide(e1, e2) {
-    return (e1.intersection[2] > 0 && e2.intersection[2]) > 0 ||
-        (e1.intersection[2] < 0 && e2.intersection[2] < 0)
+    // Return false if either intersection is null
+    if (!e1.intersection || !e2.intersection) {
+        return false;
+    }
+    
+    return (e1.intersection[2] > 0 && e2.intersection[2] > 0) ||
+           (e1.intersection[2] < 0 && e2.intersection[2] < 0);
 }
 
 /** Context for one line clipping calculations. */
