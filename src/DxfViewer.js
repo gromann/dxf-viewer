@@ -37,6 +37,10 @@ export class DxfViewer {
       if (externalRenderer) {
         this.renderer = externalRenderer;
         this.canvas = this.renderer.domElement;
+        // this.renderer.setSize(this.canvas., options.canvasHeight);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+
       } else {
         this.renderer = new three.WebGLRenderer({
           alpha: options.canvasAlpha,
@@ -270,8 +274,11 @@ export class DxfViewer {
     this.parsedDxf = dxf;
 
     this.origin = scene.origin;
+    // this.origin = scene.origin;
+
     this.bounds = scene.bounds;
     this.hasMissingChars = scene.hasMissingChars;
+    console.log("parsed scene", scene, "origin: ", this.origin, "bounds: ", this.bounds);
 
     for (const layer of scene.layers) {
       this.layers.set(layer.name, new Layer(layer.name, layer.displayName, layer.color));

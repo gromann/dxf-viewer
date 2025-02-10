@@ -2179,6 +2179,7 @@ export class DxfScene {
             /* Block definition in block coordinates. So it should not touch bounds and origin. */
             return blockCtx.TransformVertex(v)
         }
+        // console.log("Transforming vertex", v, "with origin", this.origin);
         this._UpdateBounds(v)
         return { x: v.x - this.origin.x, y: v.y - this.origin.y }
     }
