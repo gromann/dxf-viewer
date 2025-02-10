@@ -99,41 +99,42 @@ export class DxfScene {
         this.numBlocksFlattened = 0
         this.numEntitiesFiltered = 0
         this.unitsScale = this._GetUnitsScale(); // Determine the scale factor
-        console.log("Units scale: " + this.unitsScale);
 
     }
 
     _GetUnitsScale() {
-        console.log("INSUNITS: " + this.vars);
-        let insunits = this.vars.INSUNITS;
-        console.log("INSUNITS: " + insunits);
+        let insunits = this.vars.get("INSUNITS"); // Correctly access the map
 
         if (insunits === undefined) {
             return 0.1; // Default to 1 if INSUNITS is not defined
         }
     
-        console.log("INSUNITS: " + insunits);
         switch (insunits) {
             case 0:  return 1; // Unitless
             case 1:  return 2.54; // Inches to cm
             case 2:  return 30.48; // Feet to cm
-            case 3:  return 0.1; // Millimeters to cm (0.1)
-            case 4:  return 1; // Centimeters to cm
-            case 5:  return 100; // Meters to cm
-            case 6:  return 1000; // Kilometers to cm
-            case 7:  return 2.54e-8; // Microinches to cm
-            case 8:  return 2.54e-5; // Mils to cm
-            case 9:  return 2.54e-5; // Yards to cm
-            case 10: return 91.44; // Angstroms to cm
-            case 11: return 149597870700; // Nanometers to cm
-            case 12: return 149597870700000; // Microns to cm
-            case 13: return 149597870700000000; // Decimeters to cm
-            case 14: return 149597870700000000000; // Decameters to cm
-            case 15: return 149597870700000000000000; // Hectometers to cm
-            case 16: return 149597870700000000000000000; // Gigameters to cm
-            case 17: return 3.261563777e+24; // Astronomical units to cm
-            case 18: return 9.460730473e+18; // Light years to cm
-            case 19: return 3.085677581e+19; // Parsecs to cm
+            case 3:  return 160934.4; // Miles to cm
+            case 4:  return 0.1; // Millimeters to cm
+            case 5:  return 1; // Centimeters to cm
+            case 6:  return 100; // Meters to cm
+            case 7:  return 100000; // Kilometers to cm
+            case 8:  return 2.54e-6; // Microinches to cm
+            case 9:  return 0.000254; // Mils to cm
+            case 10: return 91.44; // Yards to cm
+            case 11: return 1e-8; // Angstroms to cm
+            case 12: return 1e-7; // Nanometers to cm
+            case 13: return 1e-4; // Microns to cm
+            case 14: return 10; // Decimeters to cm
+            case 15: return 1000; // Decameters to cm
+            case 16: return 10000; // Hectometers to cm
+            case 17: return 1e+11; // Gigameters to cm
+            case 18: return 1.496e+13; // Astronomical units to cm
+            case 19: return 9.461e+18; // Light years to cm
+            case 20: return 3.086e+19; // Parsecs to cm
+            case 21: return 30.480061; // US Survey Feet to cm
+            case 22: return 2.540005; // US Survey Inch to cm
+            case 23: return 91.440183; // US Survey Yard to cm
+            case 24: return 160934.721869; // US Survey Mile to cm
             default: return 1; // Default to 1 if INSUNITS is unknown
         }
     }
@@ -153,6 +154,8 @@ export class DxfScene {
                 this.vars.set(name.slice(1), value)
             }
         }
+        this.unitsScale = this._GetUnitsScale();
+
 
         /* Zero angle direction, 0 is +X. */
         this.angBase = this.vars.get("ANGBASE") ?? 0
