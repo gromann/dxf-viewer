@@ -98,7 +98,46 @@ export class DxfScene {
         this.pointShapeBlock = null
         this.numBlocksFlattened = 0
         this.numEntitiesFiltered = 0
+        this.unitsScale = this._GetUnitsScale(); // Determine the scale factor
+        console.log("Units scale: " + this.unitsScale);
+
     }
+
+    _GetUnitsScale() {
+        console.log("INSUNITS: " + this.vars);
+        let insunits = this.vars.INSUNITS;
+        console.log("INSUNITS: " + insunits);
+
+        if (insunits === undefined) {
+            return 0.1; // Default to 1 if INSUNITS is not defined
+        }
+    
+        console.log("INSUNITS: " + insunits);
+        switch (insunits) {
+            case 0:  return 1; // Unitless
+            case 1:  return 2.54; // Inches to cm
+            case 2:  return 30.48; // Feet to cm
+            case 3:  return 0.1; // Millimeters to cm (0.1)
+            case 4:  return 1; // Centimeters to cm
+            case 5:  return 100; // Meters to cm
+            case 6:  return 1000; // Kilometers to cm
+            case 7:  return 2.54e-8; // Microinches to cm
+            case 8:  return 2.54e-5; // Mils to cm
+            case 9:  return 2.54e-5; // Yards to cm
+            case 10: return 91.44; // Angstroms to cm
+            case 11: return 149597870700; // Nanometers to cm
+            case 12: return 149597870700000; // Microns to cm
+            case 13: return 149597870700000000; // Decimeters to cm
+            case 14: return 149597870700000000000; // Decameters to cm
+            case 15: return 149597870700000000000000; // Hectometers to cm
+            case 16: return 149597870700000000000000000; // Gigameters to cm
+            case 17: return 3.261563777e+24; // Astronomical units to cm
+            case 18: return 9.460730473e+18; // Light years to cm
+            case 19: return 3.085677581e+19; // Parsecs to cm
+            default: return 1; // Default to 1 if INSUNITS is unknown
+        }
+    }
+
 
     /** Build the scene from the provided parsed DXF.
      * @param dxf {{}} Parsed DXF file.
@@ -1545,6 +1584,7 @@ export class DxfScene {
         this._UpdateBounds(new Vector2(bounds.maxX, bounds.minY).applyMatrix3(transform))
 
         transform.translate(-this.origin.x, -this.origin.y)
+        transform.scale(this.unitsScale, this.unitsScale)
         //XXX grid instancing not supported yet
         if (block.flatten) {
             for (const batch of block.batches) {
@@ -2177,11 +2217,11 @@ export class DxfScene {
     _TransformVertex(v, blockCtx = null) {
         if (blockCtx) {
             /* Block definition in block coordinates. So it should not touch bounds and origin. */
-            return blockCtx.TransformVertex(v)
+            return blockCtx.TransformVertex(v, 1)
         }
         // console.log("Transforming vertex", v, "with origin", this.origin);
         this._UpdateBounds(v)
-        return { x: v.x - this.origin.x, y: v.y - this.origin.y }
+        return { x: (v.x - this.origin.x) * this.unitsScale, y: (v.y - this.origin.y) * this.unitsScale }
     }
 
     /** @param v {{x,y}} Vertex to extend bounding box with and set origin. */
@@ -2533,8 +2573,8 @@ class BlockContext {
      * @param v {{x,y}}
      * @return {{x,y}}
      */
-    TransformVertex(v) {
-        const result = new Vector2(v.x, v.y).applyMatrix3(this.transform)
+    TransformVertex(v, scale) {
+        const result = new Vector2(v.x, v.y).applyMatrix3(this.transform.scale(scale, scale))
         if (this.type !== BlockContext.Type.DEFINITION &&
             this.type !== BlockContext.Type.NESTED_DEFINITION) {
 
@@ -2564,6 +2604,7 @@ class BlockContext {
         const mInsert = new Matrix3().translate(-this.origin.x, -this.origin.y)
         const yScale = entity.yScale || 1
         const xScale = entity.xScale || 1
+
         const rotation = -(entity.rotation || 0) * Math.PI / 180
         let x = entity.position.x
         const y = entity.position.y
