@@ -98,7 +98,6 @@ export class DxfScene {
         this.pointShapeBlock = null
         this.numBlocksFlattened = 0
         this.numEntitiesFiltered = 0
-        this.unitsScale = this._GetUnitsScale(); // Determine the scale factor
 
     }
 
@@ -1586,8 +1585,8 @@ export class DxfScene {
         this._UpdateBounds(new Vector2(bounds.minX, bounds.maxY).applyMatrix3(transform))
         this._UpdateBounds(new Vector2(bounds.maxX, bounds.minY).applyMatrix3(transform))
 
-        transform.translate(-this.origin.x, -this.origin.y)
         transform.scale(this.unitsScale, this.unitsScale)
+        transform.translate(-this.origin.x  , -this.origin.y  )
         //XXX grid instancing not supported yet
         if (block.flatten) {
             for (const batch of block.batches) {
@@ -2224,11 +2223,13 @@ export class DxfScene {
         }
         // console.log("Transforming vertex", v, "with origin", this.origin);
         this._UpdateBounds(v)
-        return { x: (v.x - this.origin.x) * this.unitsScale, y: (v.y - this.origin.y) * this.unitsScale }
+        return { x: (v.x * this.unitsScale - this.origin.x) , y: (v.y * this.unitsScale - this.origin.y)  }
     }
 
     /** @param v {{x,y}} Vertex to extend bounding box with and set origin. */
     _UpdateBounds(v) {
+        v.x = v.x * this.unitsScale
+        v.y = v.y * this.unitsScale
         if (this.bounds === null) {
             this.bounds = { minX: v.x, maxX: v.x, minY: v.y, maxY: v.y }
         } else {

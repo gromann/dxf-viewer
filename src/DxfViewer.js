@@ -982,6 +982,8 @@ class Batch {
       obj.frustumCulled = false;
       obj.matrixAutoUpdate = false;
       obj._dxfViewerLayer = layer;
+      obj.userData.handle = this.key; // Add the handle to userData
+
       return obj;
     }
 
