@@ -50,7 +50,7 @@ export type EventName = "loaded" | "cleared" | "destroyed" | "resized" | "pointe
     "pointerup" | "viewChanged" | "message"
 
 export declare class DxfViewer {
-    constructor(domContainer: HTMLElement, options: DxfViewerOptions | null)
+    constructor(options?: DxfViewerOptions | null, externalRenderer?: THREE.WebGLRenderer | null, externalCamera?: THREE.OrthographicCamera | null, externalScene?: THREE.Scene | null);
     Clear(): void
     Destroy(): void
     FitView(minX: number, maxX: number, minY: number, maxY: number, padding: number): void

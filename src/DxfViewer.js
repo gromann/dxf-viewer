@@ -577,6 +577,8 @@ export class DxfViewer {
     const objects = new Batch(this, scene, batch).CreateObjects();
 
     for (const obj of objects) {
+      obj.userData.handle = batch?.key?.handle;
+      // todo: this works now only for line segments
       this.scene.add(obj);
       const layer = obj._dxfViewerLayer ?? this.defaultLayer;
       layer.PushObject(obj);
@@ -933,6 +935,68 @@ class Batch {
     yield* this._CreateObjects(instanceBatch);
   }
 
+  *_CreateObjectso(instanceBatch) {
+    const color = instanceBatch ? instanceBatch._GetInstanceColor(this) : this.key.color;
+
+    /* INSERT layer (if specified) takes precedence over layer specified in block definition. */
+    const layer = instanceBatch?.layer ?? this.layer;
+
+    //XXX line type
+    const materialFactory =
+      this.key.geometryType === BatchingKey.GeometryType.POINTS ||
+      this.key.geometryType === BatchingKey.GeometryType.POINT_INSTANCE
+        ? this.viewer._GetSimplePointMaterial
+        : this.viewer._GetSimpleColorMaterial;
+
+    const material = materialFactory.call(
+      this.viewer,
+      this.viewer._TransformColor(color),
+      instanceBatch?.GetInstanceType() ?? InstanceType.NONE
+    );
+
+    let objConstructor;
+    switch (this.key.geometryType) {
+      case BatchingKey.GeometryType.POINTS:
+      /* This method also called for creating dots for shaped point instances. */
+      case BatchingKey.GeometryType.POINT_INSTANCE:
+        objConstructor = three.Points;
+        break;
+      case BatchingKey.GeometryType.LINES:
+      case BatchingKey.GeometryType.INDEXED_LINES:
+        objConstructor = three.LineSegments;
+        break;
+      case BatchingKey.GeometryType.TRIANGLES:
+      case BatchingKey.GeometryType.INDEXED_TRIANGLES:
+        objConstructor = three.Mesh;
+        break;
+      default:
+        throw new Error("Unexpected geometry type:" + this.key.geometryType);
+    }
+
+    function CreateObject(vertices, indices) {
+      const geometry = instanceBatch ? new three.InstancedBufferGeometry() : new three.BufferGeometry();
+      geometry.setAttribute("position", vertices);
+      instanceBatch?._SetInstanceTransformAttribute(geometry);
+      if (indices) {
+        geometry.setIndex(indices);
+      }
+      const obj = new objConstructor(geometry, material);
+      obj.frustumCulled = false;
+      obj.matrixAutoUpdate = false;
+      obj._dxfViewerLayer = layer;
+      obj.userData.handle = this.key?.handle; // Add the handle to userData
+
+      return obj;
+    }
+
+    if (this.chunks) {
+      for (const chunk of this.chunks) {
+        yield CreateObject(chunk.vertices, chunk.indices);
+      }
+    } else {
+      yield CreateObject(this.vertices);
+    }
+  }
   *_CreateObjects(instanceBatch) {
     const color = instanceBatch ? instanceBatch._GetInstanceColor(this) : this.key.color;
 
@@ -982,17 +1046,19 @@ class Batch {
       obj.frustumCulled = false;
       obj.matrixAutoUpdate = false;
       obj._dxfViewerLayer = layer;
-      obj.userData.handle = this.key; // Add the handle to userData
-
       return obj;
     }
 
     if (this.chunks) {
       for (const chunk of this.chunks) {
-        yield CreateObject(chunk.vertices, chunk.indices);
+        const obj = CreateObject(chunk.vertices, chunk.indices);
+        obj.userData.handle = this.key?.handle; // Add the handle to userData
+        yield obj;
       }
     } else {
-      yield CreateObject(this.vertices);
+      const obj = CreateObject(this.vertices);
+      obj.userData.handle = this.key?.handle; // Add the handle to userData
+      yield obj;
     }
   }
 

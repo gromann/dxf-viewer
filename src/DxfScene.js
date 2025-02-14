@@ -378,7 +378,7 @@ export class DxfScene {
             renderEntities = this._DecomposeHatch(entity, blockCtx)
             break
         default:
-            console.log("Unhandled entity type: " + entity.type)
+            // console.log("Unhandled entity type: " + entity.type)
             return
         }
         for (const renderEntity of renderEntities) {
@@ -1594,7 +1594,8 @@ export class DxfScene {
             }
         } else {
             const key = new BatchingKey(layer, entity.name, BatchingKey.GeometryType.BLOCK_INSTANCE,
-                                        color, lineType)
+                                        color, lineType, entity.handle)
+                                        // console.log("insert handle: " + entity.handle);
             const batch = this._GetBatch(key)
             batch.PushInstanceTransform(transform)
         }
