@@ -22,6 +22,21 @@ export class Pattern {
         this.offsetInLineSpace = offsetInLineSpace
     }
 
+    static FromHatchEntity(entity) {
+        if (!entity.definitionLines) {
+            throw new Error("Hatch entity has no definition lines");
+        }
+
+        const lineDefs = entity.definitionLines.map(line => ({
+            angle: line.angle,
+            base: new Vector2(line.base.x, line.base.y),
+            offset: new Vector2(line.offset.x, line.offset.y),
+            dashes: line.dashes // Assuming dashes are already in the correct format
+        }));
+
+        return new Pattern(lineDefs, entity.patternName, true); // Assuming offsetInLineSpace is true
+    }
+
     static ParsePatFile(content) {
         const lines = content.split(/\r?\n/)
         if (lines.length < 2) {
@@ -86,7 +101,7 @@ export function RegisterPattern(pattern, isMetric = true) {
     const name = pattern.name.toUpperCase()
     const registry = isMetric ? patternsRegistryMetric : patternsRegistryImperial
     if (registry.has(name)) {
-        console.warn(`Pattern with name ${name} is already registered`)
+        // console.warn(`Pattern with name ${name} is already registered`)
         return
     }
     registry.set(name, pattern)

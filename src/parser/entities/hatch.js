@@ -1,118 +1,117 @@
-import * as helpers from "../ParseHelpers.js"
+// import * as helpers from "../ParseHelpers.js"
 
-export default function EntityParser() {}
+// export default function EntityParser() {}
 
-EntityParser.ForEntityName = 'HATCH';
+// EntityParser.ForEntityName = 'HATCH';
 
-EntityParser.prototype.parseEntity = function(scanner, curr) {
-    var entity;
-    entity = { type: curr.value };
+// EntityParser.prototype.parseEntity = function(scanner, curr) {
+//     var entity;
+//     entity = { type: curr.value };
 
-    let numBoundaryLoops = 0;
-    let numDefinitionLines = 0;
-    let numSeedPoints = 0;
+//     let numBoundaryLoops = 0;
+//     let numDefinitionLines = 0;
+//     let numSeedPoints = 0;
+//     curr = scanner.next();
+//     while(curr !== 'EOF') {
+//         if (curr.code === 0) break;
 
-    curr = scanner.next();
-    while(curr !== 'EOF') {
-        if (curr.code === 0) break;
+//         while (numBoundaryLoops > 0) {
+//             const loop = ParseBoundaryLoop(curr, scanner)
+//             if (loop) {
+//                 entity.boundaryLoops.push(loop);
+//                 numBoundaryLoops--;
+//                 curr = scanner.next();
+//             } else {
+//                 numBoundaryLoops = 0
+//             }
+//         }
 
-        while (numBoundaryLoops > 0) {
-            const loop = ParseBoundaryLoop(curr, scanner)
-            if (loop) {
-                entity.boundaryLoops.push(loop);
-                numBoundaryLoops--;
-                curr = scanner.next();
-            } else {
-                numBoundaryLoops = 0
-            }
-        }
+//         while (numDefinitionLines > 0) {
+//             const line = ParseDefinitionLine(curr, scanner)
+//             if (line) {
+//                 entity.definitionLines.push(line);
+//                 numDefinitionLines--;
+//                 curr = scanner.next();
+//             } else {
+//                 numDefinitionLines = 0
+//             }
+//         }
 
-        while (numDefinitionLines > 0) {
-            const line = ParseDefinitionLine(curr, scanner)
-            if (line) {
-                entity.definitionLines.push(line);
-                numDefinitionLines--;
-                curr = scanner.next();
-            } else {
-                numDefinitionLines = 0
-            }
-        }
+//         while (numSeedPoints > 0) {
+//             const pt = ParseSeedPoint(curr, scanner);
+//             if (pt) {
+//                 entity.seedPoints.push(pt);
+//                 numSeedPoints--;
+//                 curr = scanner.next();
+//             } else {
+//                 numSeedPoints = 0
+//             }
+//         }
 
-        while (numSeedPoints > 0) {
-            const pt = ParseSeedPoint(curr, scanner);
-            if (pt) {
-                entity.seedPoints.push(pt);
-                numSeedPoints--;
-                curr = scanner.next();
-            } else {
-                numSeedPoints = 0
-            }
-        }
+//         if (curr.code === 0) break;
 
-        if (curr.code === 0) break;
+//         switch(curr.code) {
 
-        switch(curr.code) {
+//         case 2: // Hatch pattern name
+//             entity.patternName = curr.value;
+//             break;
 
-        case 2: // Hatch pattern name
-            entity.patternName = curr.value;
-            break;
+//         case 70: //Solid fill flag (solid fill = 1; pattern fill = 0)
+//             entity.isSolid = curr.value != 0;
+//             break;
 
-        case 70: //Solid fill flag (solid fill = 1; pattern fill = 0)
-            entity.isSolid = curr.value != 0;
-            break;
+//         case 91: // Number of boundary paths (loops)
+//             numBoundaryLoops = curr.value;
+//             if (numBoundaryLoops > 0) {
+//                 entity.boundaryLoops = []
+//             }
+//             break;
 
-        case 91: // Number of boundary paths (loops)
-            numBoundaryLoops = curr.value;
-            if (numBoundaryLoops > 0) {
-                entity.boundaryLoops = []
-            }
-            break;
+//         // Hatch style:
+//         // 0 = Hatch “odd parity” area (Normal style)
+//         // 1 = Hatch outermost area only (Outer style)
+//         // 2 = Hatch through entire area (Ignore style)
+//         case 75:
+//             entity.hatchStyle = curr.value;
+//             break;
 
-        // Hatch style:
-        // 0 = Hatch “odd parity” area (Normal style)
-        // 1 = Hatch outermost area only (Outer style)
-        // 2 = Hatch through entire area (Ignore style)
-        case 75:
-            entity.hatchStyle = curr.value;
-            break;
+//         //Hatch pattern type:
+//         // 0 = User-defined; 1 = Predefined; 2 = Custom
+//         case 76:
+//             entity.patternType = curr.value;
+//             break;
 
-        //Hatch pattern type:
-        // 0 = User-defined; 1 = Predefined; 2 = Custom
-        case 76:
-            entity.patternType = curr.value;
-            break;
+//         case 52: // Hatch pattern angle (pattern fill only)
+//             entity.patternAngle = curr.value * Math.PI / 180;
+//             break;
 
-        case 52: // Hatch pattern angle (pattern fill only)
-            entity.patternAngle = curr.value * Math.PI / 180;
-            break;
+//         case 41: // Hatch pattern scale or spacing (pattern fill only)
+//             entity.patternScale = curr.value;
+//             break;
 
-        case 41: // Hatch pattern scale or spacing (pattern fill only)
-            entity.patternScale = curr.value;
-            break;
+//         case 78: // Number of pattern definition lines
+//             numDefinitionLines = curr.value;
+//             if (numDefinitionLines > 0) {
+//                 entity.definitionLines = []
+//             }
+//             break;
 
-        case 78: // Number of pattern definition lines
-            numDefinitionLines = curr.value;
-            if (numDefinitionLines > 0) {
-                entity.definitionLines = []
-            }
-            break;
+//         case 98: // Number of seed points
+//             numSeedPoints = curr.value;
+//             if (numSeedPoints > 0) {
+//                 entity.seedPoints = []
+//             }
+//             break;
 
-        case 98: // Number of seed points
-            numSeedPoints = curr.value;
-            if (numSeedPoints > 0) {
-                entity.seedPoints = []
-            }
-            break;
+//         default: // check common entity attributes
+//             helpers.checkCommonEntityProperties(entity, curr, scanner);
+//             break;
+//         }
+//         curr = scanner.next();
+//     }
 
-        default: // check common entity attributes
-            helpers.checkCommonEntityProperties(entity, curr, scanner);
-            break;
-        }
-        curr = scanner.next();
-    }
-
-    return entity;
-};
+//     return entity;
+// };
 
 function ParseBoundaryLoop(curr, scanner) {
     let entity = null
@@ -346,3 +345,120 @@ function ParseSeedPoint(curr, scanner) {
     }
     return helpers.parsePoint(scanner);
 }
+
+import * as helpers from "../ParseHelpers.js"
+
+export default function EntityParser() {}
+
+EntityParser.ForEntityName = 'HATCH';
+
+EntityParser.prototype.parseEntity = function(scanner, curr) {
+    var entity;
+    entity = { type: curr.value };
+
+
+    let numBoundaryLoops = 0;
+    let numDefinitionLines = 0;
+    let numSeedPoints = 0;
+
+    curr = scanner.next();
+    while(curr !== 'EOF') {
+        if (curr.code === 0) break;
+
+        while (numBoundaryLoops > 0) {
+            const loop = ParseBoundaryLoop(curr, scanner)
+            if (loop) {
+                entity.boundaryLoops.push(loop);
+                numBoundaryLoops--;
+                curr = scanner.next();
+            } else {
+                numBoundaryLoops = 0
+            }
+        }
+
+        while (numDefinitionLines > 0) {
+            const line = ParseDefinitionLine(curr, scanner)
+            if (line) {
+                entity.definitionLines.push(line);
+                numDefinitionLines--;
+                curr = scanner.next();
+            } else {
+                numDefinitionLines = 0
+            }
+        }
+
+        while (numSeedPoints > 0) {
+            const pt = ParseSeedPoint(curr, scanner);
+            if (pt) {
+                entity.seedPoints.push(pt);
+                numSeedPoints--;
+                curr = scanner.next();
+            } else {
+                numSeedPoints = 0
+            }
+        }
+
+        if (curr.code === 0) break;
+
+        switch(curr.code) {
+
+        case 2: // Hatch pattern name
+            entity.patternName = curr.value;
+            break;
+
+        case 70: //Solid fill flag (solid fill = 1; pattern fill = 0)
+            entity.isSolid = curr.value != 0;
+            break;
+
+        case 91: // Number of boundary paths (loops)
+            numBoundaryLoops = curr.value;
+            if (numBoundaryLoops > 0) {
+                entity.boundaryLoops = []
+            }
+            break;
+
+        // Hatch style:
+        // 0 = Hatch “odd parity” area (Normal style)
+        // 1 = Hatch outermost area only (Outer style)
+        // 2 = Hatch through entire area (Ignore style)
+        case 75:
+            entity.hatchStyle = curr.value;
+            break;
+
+        //Hatch pattern type:
+        // 0 = User-defined; 1 = Predefined; 2 = Custom
+        case 76:
+            entity.patternType = curr.value;
+            break;
+
+        case 52: // Hatch pattern angle (pattern fill only)
+            entity.patternAngle = curr.value * Math.PI / 180;
+            break;
+
+        case 41: // Hatch pattern scale or spacing (pattern fill only)
+            entity.patternScale = curr.value;
+            break;
+
+        case 78: // Number of pattern definition lines
+            numDefinitionLines = curr.value;
+            if (numDefinitionLines > 0) {
+                entity.definitionLines = []
+            }
+            break;
+
+        case 98: // Number of seed points
+            numSeedPoints = curr.value;
+            if (numSeedPoints > 0) {
+                entity.seedPoints = []
+            }
+            break;
+
+        default: // check common entity attributes
+            helpers.checkCommonEntityProperties(entity, curr, scanner);
+            break;
+        }
+        curr = scanner.next();
+    }
+
+    return entity;
+};
