@@ -76,43 +76,70 @@ DxfParser.prototype.parseSync = function(source) {
     }
 };
 
-DxfParser.prototype.parseStream = function(stream, done) {
-
-    var dxfString = "";
-    var self = this;
-
-    stream.on('data', onData);
-    stream.on('end', onEnd);
-    stream.on('error', onError);
-
-    function onData(chunk) {
-        dxfString += chunk;
-    }
-
-    function onEnd() {
-        try {
-            var dxf = self._parse(dxfString);
-        } catch(err) {
-            return done(err);
-        }
-        done(null, dxf);
-    }
-
-    function onError(err) {
-        done(err);
-    }
+DxfParser.prototype.parseSync = function (source) {
+  if (typeof source === "string") {
+    return this._parse(source);
+  } else {
+    console.error("Cannot read DXF source of type `" + typeof source);
+    return null;
+  }
 };
 
-DxfParser.prototype._parse = function(dxfString) {
-    var scanner, curr, dxf = {}, lastHandle = 0;
-    var dxfLinesArray = dxfString.split(/\r\n|\r|\n/g);
+DxfParser.prototype.parseStream = async function (stream, done) {
+  // this.progressCbk?.(ImportStatusPhase.upload, 7, null);
+  let reader = stream.getReader();
+  let dxfLinesArray = []; // This will accumulate lines directly
+  let buffer = "";
+  // let bytesRead = 0;
 
-    scanner = new DxfArrayScanner(dxfLinesArray);
-    if (!scanner.hasNext()) {
-        throw Error('Empty file');
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        // Make sure to process any remaining content in buffer as a line
+        if (buffer) {
+          dxfLinesArray.push(buffer);
+        }
+        break;
+      }
+      // output the reading progress as a percentage of the file size
+      // the reading of the file starts at 10% and ends at 20%
+      // let progress = reader.getProgress();
+      // bytesRead += value.length;
+      // let progressInRangge = Math.min(10 + (bytesRead / fileSize) * 10, 20); // Clamp to 20% max
+      // this.progressCbk?.(ImportStatusPhase.upload, progressInRangge, null);
+      // todo: add file size to update the progress
+      let chunk = new TextDecoder("utf-8").decode(value, { stream: true });
+      buffer += chunk;
+
+      // Process complete lines and leave any incomplete line in the buffer
+      let eolIndex;
+      while ((eolIndex = buffer.indexOf("\n")) >= 0) {
+        let line = buffer.slice(0, eolIndex).trim();
+        buffer = buffer.slice(eolIndex + 1);
+        dxfLinesArray.push(line);
+      }
     }
 
-    var self = this;
+    // Once all lines are accumulated, call the existing synchronous parse method
+    const dxf = this._parse(dxfLinesArray);
+    done(null, dxf); // Callback with the parsed DXF object
+  } catch (err) {
+    done(err); // Handle errors
+  }
+};
+
+DxfParser.prototype.parseStreamO = function (stream, done) {
+  var dxfString = "";
+  var self = this;
+
+  stream.on("data", onData);
+  stream.on("end", onEnd);
+  stream.on("error", onError);
+
+  function onData(chunk) {
+    dxfString += chunk;
+  }
 
     var parseAll = function() {
         curr = scanner.next();
