@@ -114,23 +114,15 @@ DxfParser.prototype.parseStream = async function (stream, done) {
       }
     }
 
-  function onData(chunk) {
-    dxfString += chunk;
-  }
-
-  function onEnd() {
-    try {
-      var dxf = self._parse(dxfString);
-    } catch (err) {
-      return done(err);
-    }
-    done(null, dxf);
-  }
-
-  function onError(err) {
-    done(err);
+    // Once all lines are accumulated, call the existing synchronous parse method
+    const dxf = this._parse(dxfLinesArray);
+    done(null, dxf); // Callback with the parsed DXF object
+  } catch (err) {
+    done(err); // Handle errors
   }
 };
+
+
 
 DxfParser.prototype._parse = function (dxfLinesArray) {
   var scanner,
