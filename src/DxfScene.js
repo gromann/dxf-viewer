@@ -249,6 +249,13 @@ export class DxfScene {
         if (entity.hidden) {
             return false
         }
+        const layerName = this._GetEntityLayer(entity)
+        if (layerName != "0") {
+            const layer = this.layers.get(layerName)
+            if (layer?.frozen) {
+                return false
+            }
+        }
         return !this.options.suppressPaperSpace || !entity.inPaperSpace
     }
 
@@ -421,7 +428,9 @@ export class DxfScene {
 
     /** Check if start/end with are not specified. */
     _IsPlainLine(entity) {
-        return !Boolean(entity.startWidth || entity.endWidth)
+        //XXX until shaped polylines rendering implemented
+        return true
+        // return !Boolean(entity.startWidth || entity.endWidth)
     }
 
     *_DecomposeLine(entity, blockCtx) {
@@ -1165,19 +1174,25 @@ export class DxfScene {
         const calc = new HatchCalculator(filteredBoundaryLoops, style)
 
         let pattern = null
-        if (entity.patternName) {
-            pattern = LookupPattern(entity.patternName, this.isMetric)
-            if (!pattern) {
+        if (entity.definitionLines) {
+            pattern = new Pattern(entity.definitionLines, entity.patternName, false)
+        }
+        /* QCAD always embed ANSI31-like pattern definition. Try to detect it, and let named
+         * pattern override the provided definition.
+         */
+        if ((pattern == null || pattern.isQcadDefault) && entity.patternName) {
+            const _pattern = LookupPattern(entity.patternName, this.isMetric)
+            if (!_pattern) {
                 console.log(`Hatch pattern with name ${entity.patternName} not found ` +
                             `(metric: ${this.isMetric})`)
+            } else {
+                pattern = _pattern
             }
-        }
-        if (pattern == null && entity.definitionLines) {
-            pattern = new Pattern(entity.definitionLines, null, false)
         }
         if (pattern == null) {
             pattern = LookupPattern("ANSI31")
         }
+
         if (!pattern) {
             return
         }
@@ -1186,11 +1201,14 @@ export class DxfScene {
 
         for (const seedPoint of seedPoints) {
 
-            const patTransform = calc.GetPatternTransform({
+            /* Seems pattern transform is not applied at all if using lines definition embedded into
+             * HATCH entity (according to observation of AutoDesk viewer behavior).
+             */
+            const patTransform = pattern.offsetInLineSpace ? calc.GetPatternTransform({
                 seedPoint,
                 angle: entity.patternAngle,
                 scale: entity.patternScale
-            })
+            }) : new Matrix3()
 
             for (const line of pattern.lines) {
 
@@ -2134,7 +2152,7 @@ export class DxfScene {
                 }
             }
             color = ColorCode.BY_LAYER
-        } else if (entity.hasOwnProperty("color")) {
+        } else if (entity.hasOwnProperty("color") && entity.color != null) {
             /* Index is converted to color value by parser now. */
             color = entity.color
         }
@@ -2142,11 +2160,14 @@ export class DxfScene {
         if (blockCtx) {
             return color
         }
-        if (color === ColorCode.BY_LAYER || color === ColorCode.BY_BLOCK) {
+        if (color === ColorCode.BY_BLOCK) {
             /* BY_BLOCK is not useful when not in block so replace it by layer as well. */
+            color = ColorCode.BY_LAYER
+        }
+        if (color === ColorCode.BY_LAYER) {
             if (entity.hasOwnProperty("layer")) {
                 const layer = this.layers.get(entity.layer)
-                if (layer) {
+                if (layer && layer.color != null) {
                     return layer.color
                 }
             }
@@ -2159,7 +2180,7 @@ export class DxfScene {
 
     /** @return {?string} Layer name, null for block entity. */
     _GetEntityLayer(entity, blockCtx = null) {
-        if (entity.hasOwnProperty("layer")) {
+        if (entity.hasOwnProperty("layer") && entity.layer != null) {
             return entity.layer
         }
         /* For block definition missing layer means taking layer from corresponding `INSERT` entity,
@@ -2285,6 +2306,9 @@ export class DxfScene {
         })
 
         for (const layer of this.layers.values()) {
+            if (layer.frozen) {
+                continue
+            }
             scene.layers.push({
                 name: layer.name,
                 displayName: layer.displayName,

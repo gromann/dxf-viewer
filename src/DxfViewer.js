@@ -191,12 +191,13 @@ export class DxfViewer {
 //     this.worker = null;
 //   };
 
-  /** @return {boolean} True if renderer exists. May be false in case when WebGL context is lost
-   * (e.g. after wake up from sleep). In such case page should be reloaded.
-   */
-  HasRenderer() {
-    return Boolean(this.renderer);
-  }
+    /**
+     * @returns {boolean} True if renderer exists. May be false in case when WebGL context is lost
+     * (e.g. after wake up from sleep). In such case page should be reloaded.
+     */
+    HasRenderer() {
+        return Boolean(this.renderer)
+    }
 
   /**
    * @returns {three.WebGLRenderer | null} Returns the created Three.js renderer.
@@ -242,24 +243,24 @@ export class DxfViewer {
     this.Render();
   }
 
-  /** Load DXF into the viewer. Old content is discarded, state is reset.
-   * @param url {string} DXF file URL.
-   * @param fonts {?string[]} List of font URLs. Files should have typeface.js format. Fonts are
-   *  used in the specified order, each one is checked until necessary glyph is found. Text is not
-   *  rendered if fonts are not specified.
-   * @param progressCbk {?Function} (phase, processedSize, totalSize)
-   *  Possible phase values:
-   *  * "font"
-   *  * "fetch"
-   *  * "parse"
-   *  * "prepare"
-   * @param workerFactory {?Function} Factory for worker creation. The worker script should
-   *  invoke DxfViewer.SetupWorker() function.
-   */
-  async Load({ url, fonts = null, progressCbk = null, workerFactory = null }) {
-    if (url === null || url === undefined) {
-      throw new Error("`url` parameter is not specified");
-    }
+    /** Load DXF into the viewer. Old content is discarded, state is reset.
+     * @param {string} url DXF file URL.
+     * @param {?string[]} fonts List of font URLs. Files should have typeface.js format. Fonts are
+     *  used in the specified order, each one is checked until necessary glyph is found. Text is not
+     *  rendered if fonts are not specified.
+     * @param {?Function} progressCbk (phase, processedSize, totalSize)
+     *  Possible phase values:
+     *  * "font"
+     *  * "fetch"
+     *  * "parse"
+     *  * "prepare"
+     * @param {?Function} workerFactory Factory for worker creation. The worker script should
+     *  invoke DxfViewer.SetupWorker() function.
+     */
+    async Load({url, fonts = null, progressCbk = null, workerFactory = null}) {
+        if (url === null || url === undefined) {
+            throw new Error("`url` parameter is not specified")
+        }
 
     this._EnsureRenderer();
     
@@ -341,19 +342,21 @@ export class DxfViewer {
     this.renderer.render(this.scene, this.camera);
   }
 
-//   /** @return {Iterable<{name:String, color:number}>} List of layer names. */
-  GetLayers() {
-    const result = [];
-    for (const lyr of this.layers.values()) {
-      result.push({
-        name: lyr.name,
-        displayName: lyr.displayName,
-        color: this._TransformColor(lyr.color),
-        raw: lyr
-      });
+    /** @return {Iterable<{name:String, color:number}>} List of layer names. */
+    GetLayers(nonEmptyOnly = false) {
+        const result = []
+        for (const lyr of this.layers.values()) {
+            if (nonEmptyOnly && lyr.objects.length == 0) {
+                continue
+            }
+            result.push({
+                name: lyr.name,
+                displayName: lyr.displayName,
+                color: this._TransformColor(lyr.color)
+            })
+        }
+        return result
     }
-    return result;
-  }
 
   ShowLayer(name, show) {
     this._EnsureRenderer();

@@ -36,6 +36,22 @@ export class Pattern {
 
         return new Pattern(lineDefs, entity.patternName, true); // Assuming offsetInLineSpace is true
     }
+    /** Detect QCAD default pattern embedded in HATCH entity. It does not correspond to real pattern
+     * referenced by name.
+     */
+    get isQcadDefault() {
+        if (this.lines.length != 1) {
+            return false
+        }
+        const line = this.lines[0]
+        if (line.dashes) {
+            return false
+        }
+        if (Math.abs(line.angle - Math.PI / 4) > 10e-14) {
+            return false
+        }
+        return true
+    }
 
     static ParsePatFile(content) {
         const lines = content.split(/\r?\n/)
