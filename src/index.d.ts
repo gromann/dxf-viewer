@@ -6,12 +6,13 @@ export type TextRendererOptions = {
 
 /** See DxfScene.DefaultOptions for default values and documentation. */
 export type DxfSceneOptions = {
-    arcTessellationAngle?: number,
-    minArcTessellationSubdivisions?: number,
-    wireframeMesh?: boolean,
-    suppressPaperSpace?: boolean,
-    textOptions?: TextRendererOptions,
-}
+  arcTessellationAngle?: number;
+  minArcTessellationSubdivisions?: number;
+  wireframeMesh?: boolean;
+  suppressPaperSpace?: boolean;
+  textOptions?: TextRendererOptions;
+  scaleFactor?: number;
+};
 
 /** See DxfViewer.DefaultOptions for default values and documentation. */
 export type DxfViewerOptions = {
@@ -50,25 +51,31 @@ export type EventName = "loaded" | "cleared" | "destroyed" | "resized" | "pointe
     "pointerup" | "viewChanged" | "message"
 
 export declare class DxfViewer {
-    constructor(options?: DxfViewerOptions | null, externalRenderer?: THREE.WebGLRenderer | null, externalCamera?: THREE.OrthographicCamera | null, externalScene?: THREE.Scene | null);
-    Clear(): void
-    Destroy(): void
-    FitView(minX: number, maxX: number, minY: number, maxY: number, padding: number): void
-    GetCamera(): THREE.OrthographicCamera
-    GetCanvas(): HTMLCanvasElement
-    GetLayers(): Array<LayerInfo>
-    GetOrigin(): THREE.Vector2
-    GetBounds(): {maxX: number, maxY: number, minX: number, minY: number} | null
-    GetRenderer(): THREE.WebGLRenderer | null
-    GetScene(): THREE.Scene
-    HasRenderer(): boolean
-    Load(params: DxfViewerLoadParams): Promise<void>
-    Render(): void
-    SetSize(width: number, height: number): void
-    SetView(center: THREE.Vector3, width: number): void
-    ShowLayer(name: string, show: boolean): void
-    Subscribe(eventName: EventName, eventHandler: (event: any) => void): void
-    Unsubscribe(eventName: EventName, eventHandler: (event: any) => void): void
+  constructor(
+    options?: DxfViewerOptions | null,
+    externalRenderer?: THREE.WebGLRenderer | null,
+    externalCamera?: THREE.OrthographicCamera | null,
+    externalScene?: THREE.Scene | null
+  );
+  Clear(): void;
+  Destroy(): void;
+  FitView(minX: number, maxX: number, minY: number, maxY: number, padding: number): void;
+  GetCamera(): THREE.OrthographicCamera;
+  GetCanvas(): HTMLCanvasElement;
+  GetLayers(): Array<LayerInfo>;
+  GetOrigin(): THREE.Vector2;
+  GetBounds(): { maxX: number; maxY: number; minX: number; minY: number } | null;
+  GetRenderer(): THREE.WebGLRenderer | null;
+  GetScene(): THREE.Scene;
+  GetDxf(): any;
+  HasRenderer(): boolean;
+  Load(params: DxfViewerLoadParams): Promise<void>;
+  Render(): void;
+  SetSize(width: number, height: number): void;
+  SetView(center: THREE.Vector3, width: number): void;
+  ShowLayer(name: string, show: boolean): void;
+  Subscribe(eventName: EventName, eventHandler: (event: any) => void): void;
+  Unsubscribe(eventName: EventName, eventHandler: (event: any) => void): void;
 }
 
 export declare namespace DxfViewer {

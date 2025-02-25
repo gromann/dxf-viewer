@@ -31,7 +31,14 @@ export class DxfViewer {
     // Use external scene or create a new one
     this.scene = externalScene || new three.Scene();
 
-    console.log("[DXF viewer constructor] externalRenderer", externalRenderer, "externalCamera", externalCamera, "externalScene", externalScene);
+    console.log(
+      "[DXF viewer constructor] externalRenderer",
+      externalRenderer,
+      "externalCamera",
+      externalCamera,
+      "externalScene",
+      externalScene
+    );
     // Set up the renderer
     try {
       if (externalRenderer) {
@@ -40,7 +47,6 @@ export class DxfViewer {
         // this.renderer.setSize(this.canvas., options.canvasHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-
       } else {
         this.renderer = new three.WebGLRenderer({
           alpha: options.canvasAlpha,
@@ -65,7 +71,7 @@ export class DxfViewer {
     // Use external camera or create a default one
     const camera = (this.camera = externalCamera || new three.OrthographicCamera(-1, 1, 1, -1, 0.1, 2));
     if (!externalCamera) {
-        // camera.position.z = 1;
+      // camera.position.z = 1;
       camera.position.x = 0;
       camera.position.y = 0;
     }
@@ -79,8 +85,6 @@ export class DxfViewer {
     }
 
     renderer.setClearColor(options.clearColor, options.clearAlpha);
-
-
 
     // // Attach event listeners for pointer events
 
@@ -98,106 +102,106 @@ export class DxfViewer {
 
     /** Set during data loading. */
     this.worker = null;
-}
+  }
 
-//   constructor(domContainer, options = null, externalRenderer = null, externalCamera = null, externalScene = null) {
-//     this.domContainer = domContainer;
-//     this.options = Object.create(DxfViewer.DefaultOptions);
-//     if (options) {
-//       Object.assign(this.options, options);
-//     }
-//     options = this.options;
+  //   constructor(domContainer, options = null, externalRenderer = null, externalCamera = null, externalScene = null) {
+  //     this.domContainer = domContainer;
+  //     this.options = Object.create(DxfViewer.DefaultOptions);
+  //     if (options) {
+  //       Object.assign(this.options, options);
+  //     }
+  //     options = this.options;
 
-//     this.clearColor = this.options.clearColor.getHex();
+  //     this.clearColor = this.options.clearColor.getHex();
 
-//     this.scene = externalScene || new three.Scene();
+  //     this.scene = externalScene || new three.Scene();
 
-//     try {
-//       if (externalRenderer) {
-//         this.renderer = externalRenderer;
-//         this.canvas = this.renderer.domElement;
-//       } else {
-//         this.renderer = new three.WebGLRenderer({
-//           alpha: options.canvasAlpha,
-//           premultipliedAlpha: options.canvasPremultipliedAlpha,
-//           antialias: options.antialias,
-//           depth: false,
-//           preserveDrawingBuffer: options.preserveDrawingBuffer,
-//         });
-//       }
-//     } catch (e) {
-//       console.log("Failed to create renderer: " + e);
-//       this.renderer = null;
-//       return;
-//     }
-//     const renderer = this.renderer;
-//     /* Prevent bounding spheres calculations which fails due to non-conventional geometry
-//      * buffers layout. Also do not waste CPU on sorting which we do not need anyway.
-//      */
-//     renderer.sortObjects = false;
-//     renderer.setPixelRatio(window.devicePixelRatio);
+  //     try {
+  //       if (externalRenderer) {
+  //         this.renderer = externalRenderer;
+  //         this.canvas = this.renderer.domElement;
+  //       } else {
+  //         this.renderer = new three.WebGLRenderer({
+  //           alpha: options.canvasAlpha,
+  //           premultipliedAlpha: options.canvasPremultipliedAlpha,
+  //           antialias: options.antialias,
+  //           depth: false,
+  //           preserveDrawingBuffer: options.preserveDrawingBuffer,
+  //         });
+  //       }
+  //     } catch (e) {
+  //       console.log("Failed to create renderer: " + e);
+  //       this.renderer = null;
+  //       return;
+  //     }
+  //     const renderer = this.renderer;
+  //     /* Prevent bounding spheres calculations which fails due to non-conventional geometry
+  //      * buffers layout. Also do not waste CPU on sorting which we do not need anyway.
+  //      */
+  //     renderer.sortObjects = false;
+  //     renderer.setPixelRatio(window.devicePixelRatio);
 
-//     const camera = (this.camera = externalCamera || new three.OrthographicCamera(-1, 1, 1, -1, 0.1, 2));
-//     camera.position.z = 1;
-//     if (!externalCamera) {
-//       camera.position.x = 0;
-//       camera.position.y = 0;
-//     }
+  //     const camera = (this.camera = externalCamera || new three.OrthographicCamera(-1, 1, 1, -1, 0.1, 2));
+  //     camera.position.z = 1;
+  //     if (!externalCamera) {
+  //       camera.position.x = 0;
+  //       camera.position.y = 0;
+  //     }
 
-//     this.simpleColorMaterial = [];
-//     this.simplePointMaterial = [];
-//     for (let i = 0; i < InstanceType.MAX; i++) {
-//       this.simpleColorMaterial[i] = this._CreateSimpleColorMaterial(i);
-//       this.simplePointMaterial[i] = this._CreateSimplePointMaterial(i);
-//     }
+  //     this.simpleColorMaterial = [];
+  //     this.simplePointMaterial = [];
+  //     for (let i = 0; i < InstanceType.MAX; i++) {
+  //       this.simpleColorMaterial[i] = this._CreateSimpleColorMaterial(i);
+  //       this.simplePointMaterial[i] = this._CreateSimplePointMaterial(i);
+  //     }
 
-//     renderer.setClearColor(options.clearColor, options.clearAlpha);
+  //     renderer.setClearColor(options.clearColor, options.clearAlpha);
 
-//     if (options.autoResize) {
-//       this.canvasWidth = domContainer.clientWidth;
-//       this.canvasHeight = domContainer.clientHeight;
-//       domContainer.style.position = "relative";
-//     } else {
-//       this.canvasWidth = options.canvasWidth;
-//       this.canvasHeight = options.canvasHeight;
-//       this.resizeObserver = null;
-//     }
-//     renderer.setSize(this.canvasWidth, this.canvasHeight);
+  //     if (options.autoResize) {
+  //       this.canvasWidth = domContainer.clientWidth;
+  //       this.canvasHeight = domContainer.clientHeight;
+  //       domContainer.style.position = "relative";
+  //     } else {
+  //       this.canvasWidth = options.canvasWidth;
+  //       this.canvasHeight = options.canvasHeight;
+  //       this.resizeObserver = null;
+  //     }
+  //     renderer.setSize(this.canvasWidth, this.canvasHeight);
 
-//     this.canvas = renderer.domElement;
-//     domContainer.style.display = "block";
-//     if (options.autoResize) {
-//       this.canvas.style.position = "absolute";
-//       this.resizeObserver = new ResizeObserver((entries) => this._OnResize(entries[0]));
-//       this.resizeObserver.observe(domContainer);
-//     }
-//     domContainer.appendChild(this.canvas);
+  //     this.canvas = renderer.domElement;
+  //     domContainer.style.display = "block";
+  //     if (options.autoResize) {
+  //       this.canvas.style.position = "absolute";
+  //       this.resizeObserver = new ResizeObserver((entries) => this._OnResize(entries[0]));
+  //       this.resizeObserver.observe(domContainer);
+  //     }
+  //     domContainer.appendChild(this.canvas);
 
-//     this.canvas.addEventListener("pointerdown", this._OnPointerEvent.bind(this));
-//     this.canvas.addEventListener("pointerup", this._OnPointerEvent.bind(this));
+  //     this.canvas.addEventListener("pointerdown", this._OnPointerEvent.bind(this));
+  //     this.canvas.addEventListener("pointerup", this._OnPointerEvent.bind(this));
 
-//     this.Render();
+  //     this.Render();
 
-//     /* Indexed by MaterialKey, value is {key, material}. */
-//     this.materials = new RBTree((m1, m2) => m1.key.Compare(m2.key));
-//     /* Indexed by layer name, value is Layer instance. */
-//     this.layers = new Map();
-//     /* Default layer used when no layer specified. */
-//     this.defaultLayer = null;
-//     /* Indexed by block name, value is Block instance. */
-//     this.blocks = new Map();
+  //     /* Indexed by MaterialKey, value is {key, material}. */
+  //     this.materials = new RBTree((m1, m2) => m1.key.Compare(m2.key));
+  //     /* Indexed by layer name, value is Layer instance. */
+  //     this.layers = new Map();
+  //     /* Default layer used when no layer specified. */
+  //     this.defaultLayer = null;
+  //     /* Indexed by block name, value is Block instance. */
+  //     this.blocks = new Map();
 
-//     /** Set during data loading. */
-//     this.worker = null;
-//   };
+  //     /** Set during data loading. */
+  //     this.worker = null;
+  //   };
 
-    /**
-     * @returns {boolean} True if renderer exists. May be false in case when WebGL context is lost
-     * (e.g. after wake up from sleep). In such case page should be reloaded.
-     */
-    HasRenderer() {
-        return Boolean(this.renderer)
-    }
+  /**
+   * @returns {boolean} True if renderer exists. May be false in case when WebGL context is lost
+   * (e.g. after wake up from sleep). In such case page should be reloaded.
+   */
+  HasRenderer() {
+    return Boolean(this.renderer);
+  }
 
   /**
    * @returns {three.WebGLRenderer | null} Returns the created Three.js renderer.
@@ -208,10 +212,6 @@ export class DxfViewer {
 
   GetCanvas() {
     return this.canvas;
-  }
-
-  GetDxf() {
-    return this.parsedDxf;
   }
 
   SetSize(width, height) {
@@ -243,27 +243,27 @@ export class DxfViewer {
     this.Render();
   }
 
-    /** Load DXF into the viewer. Old content is discarded, state is reset.
-     * @param {string} url DXF file URL.
-     * @param {?string[]} fonts List of font URLs. Files should have typeface.js format. Fonts are
-     *  used in the specified order, each one is checked until necessary glyph is found. Text is not
-     *  rendered if fonts are not specified.
-     * @param {?Function} progressCbk (phase, processedSize, totalSize)
-     *  Possible phase values:
-     *  * "font"
-     *  * "fetch"
-     *  * "parse"
-     *  * "prepare"
-     * @param {?Function} workerFactory Factory for worker creation. The worker script should
-     *  invoke DxfViewer.SetupWorker() function.
-     */
-    async Load({url, fonts = null, progressCbk = null, workerFactory = null}) {
-        if (url === null || url === undefined) {
-            throw new Error("`url` parameter is not specified")
-        }
+  /** Load DXF into the viewer. Old content is discarded, state is reset.
+   * @param {string} url DXF file URL.
+   * @param {?string[]} fonts List of font URLs. Files should have typeface.js format. Fonts are
+   *  used in the specified order, each one is checked until necessary glyph is found. Text is not
+   *  rendered if fonts are not specified.
+   * @param {?Function} progressCbk (phase, processedSize, totalSize)
+   *  Possible phase values:
+   *  * "font"
+   *  * "fetch"
+   *  * "parse"
+   *  * "prepare"
+   * @param {?Function} workerFactory Factory for worker creation. The worker script should
+   *  invoke DxfViewer.SetupWorker() function.
+   */
+  async Load({ url, fonts = null, progressCbk = null, workerFactory = null }) {
+    if (url === null || url === undefined) {
+      throw new Error("`url` parameter is not specified");
+    }
 
     this._EnsureRenderer();
-    
+
     // if (!this.externalScene) {
     //     this.Clear();
     // }
@@ -342,21 +342,21 @@ export class DxfViewer {
     this.renderer.render(this.scene, this.camera);
   }
 
-    /** @return {Iterable<{name:String, color:number}>} List of layer names. */
-    GetLayers(nonEmptyOnly = false) {
-        const result = []
-        for (const lyr of this.layers.values()) {
-            if (nonEmptyOnly && lyr.objects.length == 0) {
-                continue
-            }
-            result.push({
-                name: lyr.name,
-                displayName: lyr.displayName,
-                color: this._TransformColor(lyr.color)
-            })
-        }
-        return result
+  /** @return {Iterable<{name:String, color:number}>} List of layer names. */
+  GetLayers(nonEmptyOnly = false) {
+    const result = [];
+    for (const lyr of this.layers.values()) {
+      if (nonEmptyOnly && lyr.objects.length == 0) {
+        continue;
+      }
+      result.push({
+        name: lyr.name,
+        displayName: lyr.displayName,
+        color: this._TransformColor(lyr.color),
+      });
     }
+    return result;
+  }
 
   ShowLayer(name, show) {
     this._EnsureRenderer();
@@ -456,6 +456,10 @@ export class DxfViewer {
    */
   GetScene() {
     return this.scene;
+  }
+
+  GetDxf() {
+    return this.parsedDxf;
   }
 
   /** @return {OrthographicCamera} three.js camera for the viewer. */

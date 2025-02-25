@@ -83,51 +83,53 @@ export class TextRenderer {
      */
     async FetchFonts(text) {
         if (!this.stubShapeLoaded) {
-            this.stubShapeLoaded = true
-            for (const char of Array.from(this.options.fallbackChar)) {
-                if (await this.FetchFonts(char)) {
-                    this.stubShape = this._CreateCharShape(char)
-                    break
-                }
+          this.stubShapeLoaded = true;
+          for (const char of Array.from(this.options.fallbackChar)) {
+            if (await this.FetchFonts(char)) {
+              this.stubShape = this._CreateCharShape(char);
+              break;
             }
+          }
         }
-        let charMissing = false
+        let charMissing = false;
         for (const char of text) {
-            if (char.codePointAt(0) < 0x20) {
-                /* Control character. */
-                continue
+          if (char.codePointAt(0) < 0x20) {
+            /* Control character. */
+            continue;
+          }
+          let found = false;
+          for (const font of this.fonts) {
+            if (font.HasChar(char)) {
+              found = true;
+              break;
             }
-            let found = false
-            for (const font of this.fonts) {
-                if (font.HasChar(char)) {
-                    found = true
-                    break
-                }
+          }
+          if (found) {
+            continue;
+          }
+          if (!this.fontFetchers) {
+            return false;
+          }
+          while (this.fontFetchers.length > 0) {
+            const fetcher = this.fontFetchers.shift();
+            const font = await this._FetchFont(fetcher);
+            this.fonts.push(font);
+            if (font.HasChar(char)) {
+              found = true;
+              break;
             }
-            if (found) {
-                continue
-            }
-            if (!this.fontFetchers) {
-                return false
-            }
-            while (this.fontFetchers.length > 0) {
-                const fetcher = this.fontFetchers.shift()
-                const font = await this._FetchFont(fetcher)
-                this.fonts.push(font)
-                if (font.HasChar(char)) {
-                    found = true
-                    break
-                }
-            }
-            if (!found) {
-                charMissing = true
-            }
+          }
+          if (!found) {
+            charMissing = true;
+          }
         }
         return !charMissing
     }
 
     get canRender() {
-        return this.fonts !== null && this.fonts.length > 0
+        let canRender = this.fonts !== null && this.fonts.length > 0;
+
+        return canRender;
     }
 
     /** Get width in model space units for a single line of text.

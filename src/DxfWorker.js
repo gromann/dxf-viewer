@@ -38,6 +38,7 @@ export class DxfWorker {
                                      { url, fonts, options: this._CloneOptions(options) },
                                      progressCbk)
         } else {
+            console.warn("DxfWorker is not initialized, loading in main thread", options);
             return this._Load(url, fonts, options, progressCbk)
         }
     }
@@ -147,19 +148,20 @@ export class DxfWorker {
 
     /** @return {Object} DxfScene serialized scene. */
     async _Load(url, fonts, options, progressCbk) {
-        let fontFetchers
-        if (fonts) {
-            fontFetchers = this._CreateFontFetchers(fonts, progressCbk)
-        } else {
-            fontFetchers = []
-        }
-        const dxf = await new DxfFetcher(url, options.fileEncoding).Fetch(progressCbk)
-        if (progressCbk) {
-            progressCbk("prepare", 0, null)
-        }
-        const dxfScene = new DxfScene(options)
-        await dxfScene.Build(dxf, fontFetchers)
-        return {scene: dxfScene.scene, dxf: options.retainParsedDxf === true ? dxf : undefined }
+      let fontFetchers;
+      if (fonts) {
+        fontFetchers = this._CreateFontFetchers(fonts, progressCbk);
+      } else {
+        fontFetchers = [];
+      }
+      const dxf = await new DxfFetcher(url, options.fileEncoding).Fetch(progressCbk);
+
+      if (progressCbk) {
+        progressCbk("prepare", 0, null);
+      }
+      const dxfScene = new DxfScene(options);
+      await dxfScene.Build(dxf, fontFetchers);
+      return { scene: dxfScene.scene, dxf: options.retainParsedDxf === true ? dxf : undefined };
     }
 
     _CreateFontFetchers(urls, progressCbk) {
