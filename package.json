@@ -25,10 +25,10 @@
     "dependencies": {
         "loglevel": "^1.9.1",
         "opentype.js": "^1.3.4",
-        "three": "^0.168.0",
+        "three": "^0.174.0",
         "earcut": "^3.0.0"
     },
     "devDependencies": {
-        "@types/three": "^0.161.2"
+        "@types/three": "^0.174"
     }
 }
