@@ -353,6 +353,7 @@ export class DxfViewer {
         name: lyr.name,
         displayName: lyr.displayName,
         color: this._TransformColor(lyr.color),
+        visible: lyr.visible,
       });
     }
     return result;
@@ -362,6 +363,7 @@ export class DxfViewer {
     this._EnsureRenderer();
     const layer = this.layers.get(name);
     if (!layer) {
+      console.log(`Layer "${name}" not found`);
       return;
     }
     for (const obj of layer.objects) {
@@ -991,7 +993,7 @@ class Batch {
       obj.frustumCulled = false;
       obj.matrixAutoUpdate = false;
       obj._dxfViewerLayer = layer;
-      obj.userData.handle = this.key?.handle; // Add the handle to userData
+      // obj.userData.handle = this.key?.handle; // Add the handle to userData
 
       return obj;
     }
@@ -1053,6 +1055,9 @@ class Batch {
       obj.frustumCulled = false;
       obj.matrixAutoUpdate = false;
       obj._dxfViewerLayer = layer;
+      // obj.userData.handle = this.key?.handle; // already present
+      // Add the layer name to userData for later lookup.
+      obj.userData.layerName = layer ? layer.name : "default";
       return obj;
     }
 
@@ -1122,6 +1127,7 @@ class Layer {
     this.displayName = displayName;
     this.color = color;
     this.objects = [];
+    this.visible = true;
   }
 
   PushObject(obj) {
