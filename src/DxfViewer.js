@@ -42,6 +42,7 @@ export class DxfViewer {
     // Set up the renderer
     try {
       if (externalRenderer) {
+        this.exernalRendererUsed = true;
         this.renderer = externalRenderer;
         this.canvas = this.renderer.domElement;
         // this.renderer.setSize(this.canvas., options.canvasHeight);
@@ -374,6 +375,7 @@ export class DxfViewer {
 
   /** Reset the viewer state. */
   Clear() {
+    console.log("[DXF viewer] clear");
     this._EnsureRenderer();
     if (this.worker) {
       this.worker.Destroy(true);
@@ -391,7 +393,7 @@ export class DxfViewer {
     this.blocks.clear();
     this.materials.each((e) => e.material.dispose());
     this.materials.clear();
-    this.SetView({ x: 0, y: 0 }, 2);
+    if (!this.exernalRendererUsed) this.SetView({ x: 0, y: 0 }, 2);
     this._Emit("cleared");
     this.Render();
   }
