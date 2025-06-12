@@ -861,7 +861,7 @@ DxfParser.prototype._parse = function (dxfLinesArray) {
                 `);
             pattern.name = entity.patternName;
             RegisterPattern(pattern, true); // Assuming 1 is metric
-            console.log(`Registered hatch pattern from entity: ${entity.patternName}`);
+            // console.log(`Registered hatch pattern from entity: ${entity.patternName}`);
           } catch (error) {
             // console.warn(`Failed to parse hatch pat tern ${entity.patternName}: ${error}`);
           }

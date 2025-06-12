@@ -101,7 +101,6 @@ export class DxfScene {
   }
 
   _GetScaleFactor() {
-    console.log("Scale factor: " + this.options.scaleFactor, this._GetUnitsScale());
     return this.scaleFactor * this._GetUnitsScale();
   }
 
@@ -184,7 +183,6 @@ export class DxfScene {
       }
     }
     this.unitsScale = this._GetScaleFactor();
-    console.log("Units scale: " + this.unitsScale);
 
     /* Zero angle direction, 0 is +X. */
     this.angBase = this.vars.get("ANGBASE") ?? 0;
@@ -301,12 +299,10 @@ export class DxfScene {
 
     const ProcessEntity = async (entity) => {
       if (!this._FilterEntity(entity)) {
-        console.log("Filtered entity", entity.type);
         return;
       }
       let ret;
       if (entity.type === "TEXT" || entity.type === "ATTRIB" || entity.type === "ATTDEF") {
-        console.log("Processing text based entity");
         ret = await this.textRenderer.FetchFonts(ParseSpecialChars(entity.text));
       } else if (entity.type === "MTEXT") {
         const parser = new MTextFormatParser();
@@ -377,12 +373,10 @@ export class DxfScene {
 
     const ProcessEntity = async (entity) => {
       if (!this._FilterEntity(entity)) {
-        console.log("Filtered entity", entity.type);
         return;
       }
       let ret = true; // Default to true
       if (entity.type === "TEXT" || entity.type === "ATTRIB" || entity.type === "ATTDEF") {
-        console.log("Processing text based entity");
         ret = await this.textRenderer.FetchFonts(ParseSpecialChars(entity.text));
       } else if (entity.type === "MTEXT") {
         const parser = new MTextFormatParser();
@@ -1349,7 +1343,7 @@ export class DxfScene {
     if ((pattern == null || pattern.isQcadDefault) && entity.patternName) {
       const _pattern = LookupPattern(entity.patternName, this.isMetric);
       if (!_pattern) {
-        console.log(`Hatch pattern with name ${entity.patternName} not found ` + `(metric: ${this.isMetric})`);
+        // console.log(`Hatch pattern with name ${entity.patternName} not found ` + `(metric: ${this.isMetric})`);
       } else {
         pattern = _pattern;
       }
