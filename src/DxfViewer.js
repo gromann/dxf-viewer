@@ -393,7 +393,10 @@ export class DxfViewer {
     this.blocks.clear();
     this.materials.each((e) => e.material.dispose());
     this.materials.clear();
-    if (!this.exernalRendererUsed) this.SetView({ x: 0, y: 0 }, 2);
+    if (!this.exernalRendererUsed) {
+      console.log("Resetting camera view to (0,0) with width 2");
+      this.SetView({ x: 0, y: 0 }, 2);
+    }
     this._Emit("cleared");
     this.Render();
   }
